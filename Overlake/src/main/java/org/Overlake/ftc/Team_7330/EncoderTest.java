@@ -27,10 +27,10 @@ public class EncoderTest extends SynchronousOpMode
         // Initialize our hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names you assigned during the robot configuration
         // step you did in the FTC Robot Controller app on the phone.
-        this.motorFrontRight = this.hardwareMap.dcMotor.get("motorRight");
-        this.motorBackRight = this.hardwareMap.dcMotor.get("motorRight");
-        this.motorFrontLeft = this.hardwareMap.dcMotor.get("motorLeft");
-        this.motorBackLeft = this.hardwareMap.dcMotor.get("motorLeft");
+        this.motorFrontRight = this.hardwareMap.dcMotor.get("motorFrontRight");
+        this.motorBackRight = this.hardwareMap.dcMotor.get("motorBackRight");
+        this.motorFrontLeft = this.hardwareMap.dcMotor.get("motorFrontLeft");
+        this.motorBackLeft = this.hardwareMap.dcMotor.get("motorBackLeft");
 
         // One of the two motors (here, the left) should be set to reversed direction
         // so that it can take the same power level values as the other motor.
@@ -53,15 +53,11 @@ public class EncoderTest extends SynchronousOpMode
         this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
 
-        while (this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS)
+        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+               this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+               this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+               this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS)
         {
-            try
-            {
-                idle();
-            }
-            catch (Exception e)
-            {
-            }
         }
 
         // Configure the knobs of the hardware according to how you've wired your
@@ -72,20 +68,49 @@ public class EncoderTest extends SynchronousOpMode
         this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
+        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
+                this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
+                this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
+                this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS)
+        {
+        }
+
         this.motorFrontRight.setTargetPosition(ticks);
         this.motorBackRight.setTargetPosition(ticks);
         this.motorFrontLeft.setTargetPosition(ticks);
         this.motorBackLeft.setTargetPosition(ticks);
+
+        while (this.motorFrontRight.getTargetPosition() != ticks &&
+                this.motorBackRight.getTargetPosition() != ticks &&
+                this.motorFrontLeft.getTargetPosition() != ticks &&
+                this.motorBackLeft.getTargetPosition() != ticks)
+        {
+        }
+
 
         this.motorFrontRight.setPower(rightPower);
         this.motorBackRight.setPower(rightPower);
         this.motorFrontLeft.setPower(leftPower);
         this.motorBackLeft.setPower(leftPower);
 
+        while (this.motorFrontRight.getPower() != rightPower &&
+               this.motorBackRight.getPower() != rightPower &&
+               this.motorFrontLeft.getPower() != leftPower &&
+               this.motorBackLeft.getPower() != leftPower)
+        {
+        }
+
         this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         this.motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+
+        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
+                this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
+                this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
+                this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION)
+        {
+        }
 
         while (this.motorFrontRight.isBusy() && this.motorBackRight.isBusy() &&
                this.motorFrontLeft.isBusy() && this.motorBackLeft.isBusy())
@@ -97,10 +122,24 @@ public class EncoderTest extends SynchronousOpMode
         this.motorFrontLeft.setPower(0);
         this.motorBackLeft.setPower(0);
 
+        while (this.motorFrontRight.getPower() != 0 &&
+                this.motorBackRight.getPower() != 0 &&
+                this.motorFrontLeft.getPower() != 0 &&
+                this.motorBackLeft.getPower() != 0)
+        {
+        }
+
         this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         this.motorBackRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+
+        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+                this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+                this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+                this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS)
+        {
+        }
     }
 
     void configureDashboard()
