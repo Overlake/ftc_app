@@ -19,10 +19,22 @@ public class EncoderTest extends SynchronousOpMode
     DcMotor motorFrontLeft;
     DcMotor motorBackLeft;
 
+    IBNO055IMU imu;
+    IBNO055IMU.Parameters parameters = new IBNO055IMU.Parameters();
+
     @Override protected void main() throws InterruptedException
     {
         // Configure the dashboard however we want it
         this.configureDashboard();
+
+        parameters.angleunit = IBNO055IMU.ANGLEUNIT.DEGREES;
+        parameters.accelunit = IBNO055IMU.ACCELUNIT.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "BNO055";
+        imu = ClassFactory.createAdaFruitBNO055IMU(hardwareMap.i2cDevice.get("imu"), parameters);
+
+        // Enable reporting of position using the naive integrator
+        imu.startAccelerationIntegration(new Position(), new Velocity());
 
         // Initialize our hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names you assigned during the robot configuration
@@ -40,13 +52,14 @@ public class EncoderTest extends SynchronousOpMode
         // Wait until we've been given the ok to go
         this.waitForStart();
 
-        int ticks = 5000;
+        double ticks = 5000;
+        double meters = 2;
         double rightPower = 0.8;
         double leftPower = 0.8;
-        driveEncoder(ticks, rightPower, leftPower);
+        driveWithEncoders(ticks, rightPower, leftPower, false);
     }
 
-    void driveEncoder(int ticks, double rightPower, double leftPower)
+    void driveWithEncoders(double distance, double rightPower, double leftPower, boolean useIMU)
     {
         this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         this.motorBackRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
@@ -69,24 +82,33 @@ public class EncoderTest extends SynchronousOpMode
         this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
         while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-                this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-                this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-                this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS)
+               this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
+               this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
+               this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS)
         {
         }
 
-        this.motorFrontRight.setTargetPosition(ticks);
-        this.motorBackRight.setTargetPosition(ticks);
-        this.motorFrontLeft.setTargetPosition(ticks);
-        this.motorBackLeft.setTargetPosition(ticks);
-
-        while (this.motorFrontRight.getTargetPosition() != ticks &&
-                this.motorBackRight.getTargetPosition() != ticks &&
-                this.motorFrontLeft.getTargetPosition() != ticks &&
-                this.motorBackLeft.getTargetPosition() != ticks)
+        int tempDistance;
+        if (useIMU)
         {
+            tempDistance = Integer.MAX_VALUE;
+        }
+        else
+        {
+            tempDistance = (int)distance;
         }
 
+        this.motorFrontRight.setTargetPosition(tempDistance);
+        this.motorBackRight.setTargetPosition(tempDistance);
+        this.motorFrontLeft.setTargetPosition(tempDistance);
+        this.motorBackLeft.setTargetPosition(tempDistance);
+
+        while (this.motorFrontRight.getTargetPosition() != tempDistance &&
+               this.motorBackRight.getTargetPosition() != tempDistance &&
+               this.motorFrontLeft.getTargetPosition() != tempDistance &&
+               this.motorBackLeft.getTargetPosition() != tempDistance)
+        {
+        }
 
         this.motorFrontRight.setPower(rightPower);
         this.motorBackRight.setPower(rightPower);
@@ -94,9 +116,9 @@ public class EncoderTest extends SynchronousOpMode
         this.motorBackLeft.setPower(leftPower);
 
         while (this.motorFrontRight.getPower() != rightPower &&
-               this.motorBackRight.getPower() != rightPower &&
-               this.motorFrontLeft.getPower() != leftPower &&
-               this.motorBackLeft.getPower() != leftPower)
+                this.motorBackRight.getPower() != rightPower &&
+                this.motorFrontLeft.getPower() != leftPower &&
+                this.motorBackLeft.getPower() != leftPower)
         {
         }
 
@@ -112,9 +134,18 @@ public class EncoderTest extends SynchronousOpMode
         {
         }
 
-        while (this.motorFrontRight.isBusy() && this.motorBackRight.isBusy() &&
-               this.motorFrontLeft.isBusy() && this.motorBackLeft.isBusy())
+        if (useIMU)
         {
+            // TODO: is this x or y?
+            while (imu.getPosition().y < distance)
+            {
+            }
+        }
+        else
+        {
+            while (this.motorFrontRight.isBusy() && this.motorBackRight.isBusy() &&
+                   this.motorFrontLeft.isBusy() && this.motorBackLeft.isBusy()) {
+            }
         }
 
         this.motorFrontRight.setPower(0);
