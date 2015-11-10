@@ -4,17 +4,27 @@ package org.Overlake.ftc.Team_7330;
  * Created by Xiao on 11/8/2015.
  */
 public class LineFollowing {
-    public enum Color {red, blue, white}
+    /////this is for red team currently
+    public enum Color {red, blue, white,}
+    public enum Side {left, right}
 
-    public boolean isColor (Color color)
+    public boolean isColor (Color color, Side side)
     {
-        //
-        return true;
+       /* return (color==Color.white&& Values in Range||
+                    color==Color.blue&& values in range||
+                    color==Color.red&& values in range)*/
     }
 
-    public void followColor(Color oldColor)
+    public void followColor(Color followColor)
     {
-        // weird zig zagging
+        if(isColor(followColor,Side.left))
+        {
+            //turn right: increase left wheel power a bit and then move forward
+        }
+        else
+        {
+            //turn left: increase right wheel power a bit and then move forward
+        }
     }
 
     public void followColorUntil(Color oldColor, Color newColor)
@@ -23,6 +33,8 @@ public class LineFollowing {
         {
             followColor(oldColor);
         }
+        //stop then follow white
+        followColor(newColor);
     }
 
     public void driveStraightUntil(Color newColor)
