@@ -179,10 +179,6 @@ public class EncoderTest extends SynchronousOpMode
         double heading = imu.getAngularOrientation().heading;
         double targetHeading = heading + turnDistance;
 
-        while (heading  < targetHeading)
-        {
-
-        }
     }
 
 
