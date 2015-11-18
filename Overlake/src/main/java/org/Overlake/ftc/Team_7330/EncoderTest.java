@@ -7,9 +7,6 @@ import org.swerverobotics.library.interfaces.*;
 
 import java.util.EmptyStackException;
 
-/**
- * An example of a synchronous opmode that implements a simple drive-a-bot. 
- */
 @TeleOp(name="EncoderTest")
 public class EncoderTest extends SynchronousOpMode
 {
@@ -20,30 +17,12 @@ public class EncoderTest extends SynchronousOpMode
     DcMotor motorFrontLeft;
     DcMotor motorBackLeft;
 
-    boolean zero;
-    boolean one;
-    boolean two;
-    boolean three;
-    boolean four;
-    boolean five;
-    boolean six;
-    boolean seven;
-    boolean eight;
-
     IBNO055IMU imu;
     IBNO055IMU.Parameters parameters = new IBNO055IMU.Parameters();
 
     @Override protected void main() throws InterruptedException
     {
-        // Configure the dashboard however we want it
-        try
-        {
-            this.composeDashboard();
-        }
-        catch (Exception e)
-        {
-            throw new EmptyStackException();
-        }
+        this.composeDashboard();
 
         parameters.angleunit = IBNO055IMU.ANGLEUNIT.DEGREES;
         parameters.accelunit = IBNO055IMU.ACCELUNIT.METERS_PERSEC_PERSEC;
@@ -80,7 +59,6 @@ public class EncoderTest extends SynchronousOpMode
         }
 
         double ticks = 5000;
-        double meters = 2;
         double rightPower = 0.8;
         double leftPower = 0.8;
         driveWithEncoders(ticks, rightPower, leftPower, false);
@@ -88,7 +66,6 @@ public class EncoderTest extends SynchronousOpMode
 
     void driveWithEncoders(double distance, double rightPower, double leftPower, boolean useIMU)
     {
-        zero = true;
         telemetry.update();
 
         while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
@@ -102,30 +79,7 @@ public class EncoderTest extends SynchronousOpMode
             this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 
-        one = true;
-
         telemetry.update();
-
-        // Configure the knobs of the hardware according to how you've wired your
-        // robot. Here, we assume that there are no encoders connected to the motors,
-        // so we inform the motor objects of that fact.
-
-        /*
-        telemetry.update();
-
-        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-               this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-               this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-               this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS)
-        {
-            this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-            this.motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-            this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-            this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        }
-
-        two = true;
-        */
 
         while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
                 this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
@@ -163,10 +117,6 @@ public class EncoderTest extends SynchronousOpMode
             this.motorBackLeft.setTargetPosition(tempDistance);
         }
 
-        three = true;
-
-        telemetry.update();
-
         telemetry.update();
 
         while (this.motorFrontRight.getPower() != rightPower &&
@@ -178,17 +128,7 @@ public class EncoderTest extends SynchronousOpMode
             this.motorBackRight.setPower(rightPower);
             this.motorFrontLeft.setPower(leftPower);
             this.motorBackLeft.setPower(leftPower);
-
         }
-
-        four = true;
-
-        telemetry.update();
-
-        telemetry.update();
-
-
-        five = true;
 
         telemetry.update();
 
@@ -206,10 +146,6 @@ public class EncoderTest extends SynchronousOpMode
             }
         }
 
-        six = true;
-
-        telemetry.update();
-
         telemetry.update();
 
         while (this.motorFrontRight.getPower() != 0 &&
@@ -222,10 +158,6 @@ public class EncoderTest extends SynchronousOpMode
             this.motorFrontLeft.setPower(0);
             this.motorBackLeft.setPower(0);
         }
-
-        seven = true;
-
-        telemetry.update();
 
         telemetry.update();
 
@@ -240,18 +172,17 @@ public class EncoderTest extends SynchronousOpMode
             this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 
-        eight = true;
-
         telemetry.update();
     }
 
+    /*
     void turn (double turnDistance, double power, double rightPower, double leftPower)
     {
-
         double heading = imu.getAngularOrientation().heading;
         double targetHeading = heading + turnDistance;
 
     }
+    */
 
 
     void composeDashboard()
@@ -323,15 +254,6 @@ public class EncoderTest extends SynchronousOpMode
                     public Object value()
                     {
                         return motorFrontRight.getTargetPosition();
-                    }
-                }));
-
-        telemetry.addLine(
-                telemetry.item("Program state ", new IFunc<Object>()
-                {
-                    public Object value()
-                    {
-                        return "" + zero +  one + two + three + four + five + six + seven + eight;
                     }
                 }));
     }
