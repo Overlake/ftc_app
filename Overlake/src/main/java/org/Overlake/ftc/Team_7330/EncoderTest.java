@@ -173,9 +173,8 @@ public class EncoderTest extends SynchronousOpMode
         }
     }
 
-    void turn (double distance, double power)
+   /** void turn (double distance, double power, double rightPower, double leftPower)
     {
-
         double heading = imu.getAngularOrientation().heading;
         double targetHeading = heading + distance;
 
@@ -263,15 +262,75 @@ public class EncoderTest extends SynchronousOpMode
             }
 
 
-            //return (Math.min(x,15)/15); **/
+            return (Math.min(x,15)/15);
         }
         this.motorFrontRight.setPower(0);
         this.motorBackRight.setPower(0);
         this.motorFrontLeft.setPower(0);
         this.motorBackLeft.setPower(0);
+    }**/
 
+    // to turn the other direction, degrees - but not power - should be negative
+    void turn(double degrees, double power)
+    {
+        double heading = imu.getAngularOrientation().heading;
+        double targetHeading = heading + degrees;
+
+        if (targetHeading > 180)
+        {
+            targetHeading -= 360;
+        }
+        else if (targetHeading < 0)
+        {
+            targetHeading += 360;
+        }
+
+        motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+
+
+        int tempDistance;
+        if (targetHeading > heading)
+        {
+            tempDistance = Integer.MAX_VALUE;
+        }
+        else
+        {
+            tempDistance = Integer.MIN_VALUE;
+        }
+
+
+        while (Math.abs(targetHeading - heading) > .5)
+        {
+
+            this.motorFrontRight.setTargetPosition(tempDistance);
+            this.motorBackRight.setTargetPosition(tempDistance);
+            this.motorFrontLeft.setTargetPosition(tempDistance);
+            this.motorBackLeft.setTargetPosition(tempDistance);
+
+            while (this.motorFrontRight.getTargetPosition() != tempDistance &&
+                    this.motorBackRight.getTargetPosition() != tempDistance &&
+                    this.motorFrontLeft.getTargetPosition() != tempDistance &&
+                    this.motorBackLeft.getTargetPosition() != tempDistance)
+            {
+            }
+
+            this.motorFrontRight.setPower(100);
+            this.motorBackRight.setPower(100);
+            this.motorFrontLeft.setPower(-100);
+            this.motorBackLeft.setPower(-100);
+
+            return (Math.min(,15)/15);
+        }
+
+        // set all the motors to zero
+        motorFrontRight.setPower(0);
+        motorBackRight.setPower(0);
+        motorFrontLeft.setPower(0);
+        motorBackLeft.setPower(0);
     }
-
 
     void configureDashboard()
     {
