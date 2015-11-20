@@ -5,11 +5,9 @@ import com.qualcomm.robotcore.util.*;
 import org.swerverobotics.library.*;
 import org.swerverobotics.library.interfaces.*;
 
-/**
- * An example of a synchronous opmode that implements a simple drive-a-bot. 
- */
+import java.util.EmptyStackException;
+
 @TeleOp(name="EncoderTest")
-@Disabled
 public class EncoderTest extends SynchronousOpMode
 {
     // All hardware variables can only be initialized inside the main() function,
@@ -24,17 +22,16 @@ public class EncoderTest extends SynchronousOpMode
 
     @Override protected void main() throws InterruptedException
     {
-        // Configure the dashboard however we want it
-        this.configureDashboard();
+        this.composeDashboard();
 
         parameters.angleunit = IBNO055IMU.ANGLEUNIT.DEGREES;
         parameters.accelunit = IBNO055IMU.ACCELUNIT.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled = true;
         parameters.loggingTag = "BNO055";
-        imu = ClassFactory.createAdaFruitBNO055IMU(hardwareMap.i2cDevice.get("imu"), parameters);
+        // imu = ClassFactory.createAdaFruitBNO055IMU(hardwareMap.i2cDevice.get("imu"), parameters);
 
         // Enable reporting of position using the naive integrator
-        imu.startAccelerationIntegration(new Position(), new Velocity());
+        // imu.startAccelerationIntegration(new Position(), new Velocity());
 
         // Initialize our hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names you assigned during the robot configuration
@@ -43,17 +40,25 @@ public class EncoderTest extends SynchronousOpMode
         this.motorBackRight = this.hardwareMap.dcMotor.get("motorBackRight");
         this.motorFrontLeft = this.hardwareMap.dcMotor.get("motorFrontLeft");
         this.motorBackLeft = this.hardwareMap.dcMotor.get("motorBackLeft");
+        telemetry.update();
 
         // One of the two motors (here, the left) should be set to reversed direction
         // so that it can take the same power level values as the other motor.
         this.motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
         this.motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        // Wait until we've been given the ok to go
-        this.waitForStart();
+        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+                this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+                this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
+                this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS)
+        {
+            this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorBackRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+        }
 
         double ticks = 5000;
-        double meters = 2;
         double rightPower = 0.8;
         double leftPower = 0.8;
         driveWithEncoders(ticks, rightPower, leftPower, false);
@@ -61,32 +66,33 @@ public class EncoderTest extends SynchronousOpMode
 
     void driveWithEncoders(double distance, double rightPower, double leftPower, boolean useIMU)
     {
-        this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-        this.motorBackRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-        this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-        this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+        telemetry.update();
 
         while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
                this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
                this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
                this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS)
         {
+            this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorBackRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
 
-        // Configure the knobs of the hardware according to how you've wired your
-        // robot. Here, we assume that there are no encoders connected to the motors,
-        // so we inform the motor objects of that fact.
-        this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        this.motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        telemetry.update();
 
-        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-               this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-               this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-               this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS)
+        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
+                this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
+                this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
+                this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION)
         {
+            this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+            this.motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+            this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+            this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
         }
+
+        telemetry.update();
 
         int tempDistance;
         if (useIMU)
@@ -98,41 +104,33 @@ public class EncoderTest extends SynchronousOpMode
             tempDistance = (int)distance;
         }
 
-        this.motorFrontRight.setTargetPosition(tempDistance);
-        this.motorBackRight.setTargetPosition(tempDistance);
-        this.motorFrontLeft.setTargetPosition(tempDistance);
-        this.motorBackLeft.setTargetPosition(tempDistance);
+        telemetry.update();
 
         while (this.motorFrontRight.getTargetPosition() != tempDistance &&
                this.motorBackRight.getTargetPosition() != tempDistance &&
                this.motorFrontLeft.getTargetPosition() != tempDistance &&
                this.motorBackLeft.getTargetPosition() != tempDistance)
         {
+            this.motorFrontRight.setTargetPosition(tempDistance);
+            this.motorBackRight.setTargetPosition(tempDistance);
+            this.motorFrontLeft.setTargetPosition(tempDistance);
+            this.motorBackLeft.setTargetPosition(tempDistance);
         }
 
-        this.motorFrontRight.setPower(rightPower);
-        this.motorBackRight.setPower(rightPower);
-        this.motorFrontLeft.setPower(leftPower);
-        this.motorBackLeft.setPower(leftPower);
+        telemetry.update();
 
         while (this.motorFrontRight.getPower() != rightPower &&
                 this.motorBackRight.getPower() != rightPower &&
                 this.motorFrontLeft.getPower() != leftPower &&
                 this.motorBackLeft.getPower() != leftPower)
         {
+            this.motorFrontRight.setPower(rightPower);
+            this.motorBackRight.setPower(rightPower);
+            this.motorFrontLeft.setPower(leftPower);
+            this.motorBackLeft.setPower(leftPower);
         }
 
-        this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        this.motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-
-        while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
-                this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
-                this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
-                this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION)
-        {
-        }
+        telemetry.update();
 
         if (useIMU)
         {
@@ -148,31 +146,36 @@ public class EncoderTest extends SynchronousOpMode
             }
         }
 
-        this.motorFrontRight.setPower(0);
-        this.motorBackRight.setPower(0);
-        this.motorFrontLeft.setPower(0);
-        this.motorBackLeft.setPower(0);
+        telemetry.update();
 
         while (this.motorFrontRight.getPower() != 0 &&
                 this.motorBackRight.getPower() != 0 &&
                 this.motorFrontLeft.getPower() != 0 &&
                 this.motorBackLeft.getPower() != 0)
         {
+            this.motorFrontRight.setPower(0);
+            this.motorBackRight.setPower(0);
+            this.motorFrontLeft.setPower(0);
+            this.motorBackLeft.setPower(0);
         }
 
-        this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-        this.motorBackRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-        this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-        this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+        telemetry.update();
 
         while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
                 this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
                 this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
                 this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS)
         {
+            this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorBackRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
+            this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
         }
+
+        telemetry.update();
     }
 
+<<<<<<< HEAD
    /** void turn (double distance, double power, double rightPower, double leftPower)
     {
         double heading = imu.getAngularOrientation().heading;
@@ -273,6 +276,11 @@ public class EncoderTest extends SynchronousOpMode
     // to turn the other direction, degrees - but not power - should be negative
     void turn(double degrees, double power)
     {
+=======
+    /*
+    void turn (double turnDistance, double power, double rightPower, double leftPower)
+    {
+>>>>>>> origin/Autonomous-Testing
         double heading = imu.getAngularOrientation().heading;
         double targetHeading = heading + degrees;
 
@@ -302,6 +310,7 @@ public class EncoderTest extends SynchronousOpMode
         }
 
 
+<<<<<<< HEAD
         while (Math.abs(targetHeading - heading) > .5)
         {
 
@@ -324,6 +333,10 @@ public class EncoderTest extends SynchronousOpMode
 
             return (Math.min(,15)/15);
         }
+=======
+    }
+    */
+>>>>>>> origin/Autonomous-Testing
 
         // set all the motors to zero
         motorFrontRight.setPower(0);
@@ -332,8 +345,77 @@ public class EncoderTest extends SynchronousOpMode
         motorBackLeft.setPower(0);
     }
 
-    void configureDashboard()
+    void composeDashboard()
     {
+        telemetry.addLine(
+                telemetry.item("BL Run mode ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return motorBackLeft.getChannelMode().toString();
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("BR Run mode ", new IFunc<Object>() {
+                    public Object value() {
+                        return motorBackRight.getChannelMode().toString();
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("FL Run mode ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return motorFrontLeft.getChannelMode().toString();
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("FR Run mode ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return motorFrontRight.getChannelMode().toString();
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("BL Encoder target ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return motorBackLeft.getTargetPosition();
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("BR Encoder target ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return motorBackRight.getTargetPosition();
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("FL Encoder target ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return motorFrontLeft.getTargetPosition();
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("FR Encoder target ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return motorFrontRight.getTargetPosition();
+                    }
+                }));
     }
 
     // Handy functions for formatting data for the dashboard
