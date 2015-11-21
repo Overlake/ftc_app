@@ -175,112 +175,10 @@ public class EncoderTest extends SynchronousOpMode
         telemetry.update();
     }
 
-<<<<<<< HEAD
-   /** void turn (double distance, double power, double rightPower, double leftPower)
-    {
-        double heading = imu.getAngularOrientation().heading;
-        double targetHeading = heading + distance;
-
-        if(targetHeading > 180)
-        {
-            targetHeading -= 180;
-        }
-        else if(targetHeading <0)
-        {
-            targetHeading += 180;
-        }
-        while(Math.abs(heading - targetHeading) > 0)
-        {
-            this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-            this.motorBackRight.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-            this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-            this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);
-
-            while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
-                    this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
-                    this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS &&
-                    this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RESET_ENCODERS)
-            {
-            }
-
-            // Configure the knobs of the hardware according to how you've wired your
-            // robot. Here, we assume that there are no encoders connected to the motors,
-            // so we inform the motor objects of that fact.
-            this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-            this.motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-            this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-            this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-
-            while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-                    this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-                    this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS &&
-                    this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_USING_ENCODERS)
-            {
-            }
-
-            int tempDistance;
-            if (targetHeading > heading)
-            {
-                tempDistance = Integer.MAX_VALUE;
-            }
-            else
-            {
-                tempDistance = Integer.MIN_VALUE;
-            }
-
-            this.motorFrontRight.setTargetPosition(tempDistance);
-            this.motorBackRight.setTargetPosition(tempDistance);
-            this.motorFrontLeft.setTargetPosition(tempDistance);
-            this.motorBackLeft.setTargetPosition(tempDistance);
-
-            while (this.motorFrontRight.getTargetPosition() != tempDistance &&
-                    this.motorBackRight.getTargetPosition() != tempDistance &&
-                    this.motorFrontLeft.getTargetPosition() != tempDistance &&
-                    this.motorBackLeft.getTargetPosition() != tempDistance)
-            {
-            }
-
-            this.motorFrontRight.setPower(rightPower);
-            this.motorBackRight.setPower(rightPower);
-            this.motorFrontLeft.setPower(leftPower);
-            this.motorBackLeft.setPower(leftPower);
-
-            while (this.motorFrontRight.getPower() != rightPower &&
-                    this.motorBackRight.getPower() != rightPower &&
-                    this.motorFrontLeft.getPower() != leftPower &&
-                    this.motorBackLeft.getPower() != leftPower)
-            {
-            }
-
-            this.motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-            this.motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-            this.motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-            this.motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-
-            while (this.motorFrontRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
-                    this.motorBackRight.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
-                    this.motorFrontLeft.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION &&
-                    this.motorBackLeft.getChannelMode() != DcMotorController.RunMode.RUN_TO_POSITION)
-            {
-            }
-
-
-            return (Math.min(x,15)/15);
-        }
-        this.motorFrontRight.setPower(0);
-        this.motorBackRight.setPower(0);
-        this.motorFrontLeft.setPower(0);
-        this.motorBackLeft.setPower(0);
-    }**/
-
-    // to turn the other direction, degrees - but not power - should be negative
+    // to turn right, degrees and power should both be positive
+    // to turn left, degrees - but not power - should be negative
     void turn(double degrees, double power)
     {
-=======
-    /*
-    void turn (double turnDistance, double power, double rightPower, double leftPower)
-    {
->>>>>>> origin/Autonomous-Testing
         double heading = imu.getAngularOrientation().heading;
         double targetHeading = heading + degrees;
 
@@ -298,51 +196,29 @@ public class EncoderTest extends SynchronousOpMode
         motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
-
-        int tempDistance;
-        if (targetHeading > heading)
-        {
-            tempDistance = Integer.MAX_VALUE;
-        }
-        else
-        {
-            tempDistance = Integer.MIN_VALUE;
+        while (Math.abs(targetHeading - heading) > .5) {
+            this.motorFrontRight.setPower(-getPower(power, (targetHeading - heading)));
+            this.motorBackRight.setPower(-getPower(power, (targetHeading - heading)));
+            this.motorFrontLeft.setPower(getPower(power, (targetHeading - heading)));
+            this.motorBackLeft.setPower(getPower(power, (targetHeading - heading)));
+            heading = imu.getAngularOrientation().heading;
         }
 
-
-<<<<<<< HEAD
-        while (Math.abs(targetHeading - heading) > .5)
-        {
-
-            this.motorFrontRight.setTargetPosition(tempDistance);
-            this.motorBackRight.setTargetPosition(tempDistance);
-            this.motorFrontLeft.setTargetPosition(tempDistance);
-            this.motorBackLeft.setTargetPosition(tempDistance);
-
-            while (this.motorFrontRight.getTargetPosition() != tempDistance &&
-                    this.motorBackRight.getTargetPosition() != tempDistance &&
-                    this.motorFrontLeft.getTargetPosition() != tempDistance &&
-                    this.motorBackLeft.getTargetPosition() != tempDistance)
-            {
-            }
-
-            this.motorFrontRight.setPower(100);
-            this.motorBackRight.setPower(100);
-            this.motorFrontLeft.setPower(-100);
-            this.motorBackLeft.setPower(-100);
-
-            return (Math.min(,15)/15);
-        }
-=======
-    }
-    */
->>>>>>> origin/Autonomous-Testing
-
-        // set all the motors to zero
         motorFrontRight.setPower(0);
         motorBackRight.setPower(0);
         motorFrontLeft.setPower(0);
         motorBackLeft.setPower(0);
+    }
+
+    double getPower(double power, double degrees) {
+        if (degrees > 0)
+        {
+            return (Math.log((Math.min(Math.E - 1, (Math.E - 1) * degrees / 15.0) + 1.0)) * power);
+        }
+        else {
+            degrees = -1 * degrees;
+            return (-(Math.log((Math.min(Math.E - 1, (Math.E - 1) * degrees / 15.0) + 1.0)) * power));
+        }
     }
 
     void composeDashboard()
