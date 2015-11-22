@@ -79,10 +79,10 @@ public class EncoderTest extends SynchronousOpMode
         motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
         while (Math.abs(targetHeading - heading) > .5) {
-            this.motorFrontRight.setPower(-getPower(power, (targetHeading - heading)));
-            this.motorBackRight.setPower(-getPower(power, (targetHeading - heading)));
-            this.motorFrontLeft.setPower(getPower(power, (targetHeading - heading)));
-            this.motorBackLeft.setPower(getPower(power, (targetHeading - heading)));
+            this.motorFrontRight.setPower(-getPower(power, targetHeading, heading));
+            this.motorBackRight.setPower(-getPower(power, targetHeading, heading));
+            this.motorFrontLeft.setPower(getPower(power, targetHeading, heading));
+            this.motorBackLeft.setPower(getPower(power, targetHeading,  heading));
             heading = imu.getAngularOrientation().heading;
         }
 
@@ -92,14 +92,19 @@ public class EncoderTest extends SynchronousOpMode
         motorBackLeft.setPower(0);
     }
 
-    double getPower(double power, double degrees) {
-        if (degrees > 0)
+    double getPower(double power, double targetHeading, double heading) {
+        double x = targetHeading - heading;
+        if (Math.abs(x) > 180)
         {
-            return (Math.log((Math.min(Math.E - 1, (Math.E - 1) * degrees / 15.0) + 1.0)) * power);
+            x += (-360 * (x / Math.abs(x)));
+        }
+
+        if (x > 0)
+        {
+            return (Math.log((Math.min(Math.E - 1, (Math.E - 1) * x / 15.0) + 1.0)) * power);
         }
         else {
-            degrees = -1 * degrees;
-            return (-(Math.log((Math.min(Math.E - 1, (Math.E - 1) * degrees / 15.0) + 1.0)) * power));
+            return (-(Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(x) / 15.0) + 1.0)) * power));
         }
     }
 
