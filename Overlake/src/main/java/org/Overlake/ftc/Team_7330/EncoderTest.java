@@ -68,7 +68,7 @@ public class EncoderTest extends SynchronousOpMode
         {
             targetHeading -= 360;
         }
-        else if (targetHeading < 0)
+        else if (targetHeading < -180)
         {
             targetHeading += 360;
         }
@@ -79,10 +79,12 @@ public class EncoderTest extends SynchronousOpMode
         motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
         while (Math.abs(targetHeading - heading) > .5) {
-            this.motorFrontRight.setPower(-getPower(power, targetHeading, heading));
-            this.motorBackRight.setPower(-getPower(power, targetHeading, heading));
-            this.motorFrontLeft.setPower(getPower(power, targetHeading, heading));
-            this.motorBackLeft.setPower(getPower(power, targetHeading,  heading));
+            double newPower = getPower(power, targetHeading, heading);
+            this.motorFrontRight.setPower(-newPower);
+            this.motorBackRight.setPower(-newPower);
+            this.motorFrontLeft.setPower(newPower);
+            this.motorBackLeft.setPower(newPower);
+            //TODO: add a wait
             heading = imu.getAngularOrientation().heading;
         }
 
@@ -93,19 +95,12 @@ public class EncoderTest extends SynchronousOpMode
     }
 
     double getPower(double power, double targetHeading, double heading) {
-        double x = targetHeading - heading;
-        if (Math.abs(x) > 180)
+        double diff = targetHeading - heading;
+        if (Math.abs(diff) > 180)
         {
-            x += (-360 * (x / Math.abs(x)));
+            diff += (-360 * (diff / Math.abs(diff)));
         }
-
-        if (x > 0)
-        {
-            return (Math.log((Math.min(Math.E - 1, (Math.E - 1) * x / 15.0) + 1.0)) * power);
-        }
-        else {
-            return (-(Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(x) / 15.0) + 1.0)) * power));
-        }
+        return ((diff / Math.abs(diff))(Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(diff) / 15.0) + 1.0)) * power));
     }
 
     void composeDashboard()
