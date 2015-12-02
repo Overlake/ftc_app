@@ -74,18 +74,19 @@ public class DriveToPosition extends SynchronousOpMode
 
         //drive forward a little bit
 
-        runToPosition(5, 5, 45);
+        runToPosition(5, 5);
 
         turn(90.0 - imu.getAngularOrientation().heading, .6);
 
-        //drive forward to the wall
+        //drive forward remaining distance to the wall
 
         //drop climbers
     }
 
-    void runToPosition(double x, double y, double heading)
+    void runToPosition(double x, double y)
     {
         double robotHeading = imu.getAngularOrientation().heading;
+        //does arctan work in radians or degrees??
         double targetHeading = Math.atan2(x - imu.getPosition().x, y - imu.getPosition().y);
 
         turn(targetHeading - robotHeading, 0.8);
@@ -99,6 +100,9 @@ public class DriveToPosition extends SynchronousOpMode
         {
             robotHeading = imu.getAngularOrientation().heading;
             targetHeading = Math.atan2(x - imu.getPosition().x, y - imu.getPosition().y);
+            //also we are going to get crashes if our position is exactly Y, bc arctan won't exist
+            //in this if statement, i'm worried if target heading = 179 and robotHeading = -179
+            //if we ever are going directly downwards or pass the roundabout point
             if (Math.abs(targetHeading - robotHeading) > 2.5)
             {
                 turn(targetHeading - robotHeading, 0.8);
