@@ -83,11 +83,41 @@ public class DriveToPosition extends SynchronousOpMode
         //drop climbers
     }
 
+    //parameters are the distance to the final position in the x and y directions respectively
+    double getTargetHeading(double deltaX, double deltaY)
+    {
+        //if current position is directly horizontal from ending position
+        if (deltaY == 0)
+        {
+            return 90.0 * (deltaX / Math.abs(deltaX));
+        }
+        //if ending position is directly in front of current position
+        else if (deltaX == 0 && deltaY > 0)
+        {
+            return 0.0;
+        }
+        //if ending position is directly behind current position
+        else if (deltaX == 0 && deltaY < 0)
+        {
+            return 179.5;
+        }
+        //if ending position is anywhere else
+        else
+        {
+            double targetHeading = Math.atan2(deltaX, deltaY);
+            if (deltaY < 0)
+            {
+                targetHeading += 180 * (deltaX/Math.abs(deltaX));
+            }
+            return targetHeading;
+        }
+    }
+
     void runToPosition(double x, double y)
     {
         double robotHeading = imu.getAngularOrientation().heading;
         //does arctan work in radians or degrees??
-        double targetHeading = Math.atan2(x - imu.getPosition().x, y - imu.getPosition().y);
+        double targetHeading = getTargetHeading(x - imu.getPosition().x, y - imu.getPosition().y);
 
         turn(targetHeading - robotHeading, 0.8);
 
@@ -99,7 +129,7 @@ public class DriveToPosition extends SynchronousOpMode
         while ((Math.abs(imu.getPosition().x - x) > 0.05 && Math.abs(imu.getPosition().y - y) > 0.05))
         {
             robotHeading = imu.getAngularOrientation().heading;
-            targetHeading = Math.atan2(x - imu.getPosition().x, y - imu.getPosition().y);
+            targetHeading = getTargetHeading(x - imu.getPosition().x, y - imu.getPosition().y);
             //also we are going to get crashes if our position is exactly Y, bc arctan won't exist
             //in this if statement, i'm worried if target heading = 179 and robotHeading = -179
             //if we ever are going directly downwards or pass the roundabout point
