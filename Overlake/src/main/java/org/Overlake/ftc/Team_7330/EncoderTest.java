@@ -17,12 +17,17 @@ public class EncoderTest extends SynchronousOpMode
     DcMotor motorFrontLeft;
     DcMotor motorBackLeft;
 
+    double heading;
+    double targetHeading;
+    double newPower;
+
     IBNO055IMU imu;
     IBNO055IMU.Parameters parameters = new IBNO055IMU.Parameters();
 
     @Override protected void main() throws InterruptedException
     {
         this.composeDashboard();
+        telemetry.update();
 
         parameters.angleunit = IBNO055IMU.ANGLEUNIT.DEGREES;
         parameters.accelunit = IBNO055IMU.ACCELUNIT.METERS_PERSEC_PERSEC;
@@ -61,8 +66,8 @@ public class EncoderTest extends SynchronousOpMode
     // to turn left, degrees - but not power - should be negative
     void turn(double degrees, double power)
     {
-        double heading = imu.getAngularOrientation().heading;
-        double targetHeading = heading + degrees;
+        heading = imu.getAngularOrientation().heading;
+        targetHeading = heading + degrees;
 
         if (targetHeading > 180)
         {
@@ -79,7 +84,8 @@ public class EncoderTest extends SynchronousOpMode
         motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
         while (Math.abs(targetHeading - heading) > .5) {
-            double newPower = getPower(power, targetHeading, heading);
+            telemetry.update();
+            newPower = getPower(power, targetHeading, heading);
             this.motorFrontRight.setPower(-newPower);
             this.motorBackRight.setPower(-newPower);
             this.motorFrontLeft.setPower(newPower);
@@ -100,7 +106,8 @@ public class EncoderTest extends SynchronousOpMode
         {
             diff += (-360 * (diff / Math.abs(diff)));
         }
-        return ((diff / Math.abs(diff))(Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(diff) / 15.0) + 1.0)) * power));
+
+        return ((diff / Math.abs(diff)) * (Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(diff) / 15.0) + 1.0)) * power));
     }
 
     void composeDashboard()
@@ -167,11 +174,29 @@ public class EncoderTest extends SynchronousOpMode
                 }));
 
         telemetry.addLine(
-                telemetry.item("FR Encoder target ", new IFunc<Object>()
+                telemetry.item("Heading ", new IFunc<Object>()
                 {
                     public Object value()
                     {
-                        return motorFrontRight.getTargetPosition();
+                        return heading;
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("Target heading ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return targetHeading;
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("Power ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return newPower;
                     }
                 }));
     }
