@@ -87,17 +87,13 @@ public class TestIMU extends SynchronousOpMode {
         }
         });
         telemetry.addLine(
-                telemetry.item("loop count: ", new IFunc<Object>()
-                {
-                    public Object value()
-                    {
+                telemetry.item("loop count: ", new IFunc<Object>() {
+                    public Object value() {
                         return loopCycles;
                     }
                 }),
-                telemetry.item("i2c cycle count: ", new IFunc<Object>()
-                {
-                    public Object value()
-                    {
+                telemetry.item("i2c cycle count: ", new IFunc<Object>() {
+                    public Object value() {
                         return i2cCycles;
                     }
                 }));
@@ -154,6 +150,29 @@ public class TestIMU extends SynchronousOpMode {
                     public Object value()
                     {
                         return formatAngle(angles.pitch);
+                    }
+                }));
+
+        telemetry.addLine(
+                telemetry.item("raw heading: ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return angles.heading;
+                    }
+                }),
+                telemetry.item("raw roll: ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return angles.roll;
+                    }
+                }),
+                telemetry.item("raw pitch: ", new IFunc<Object>()
+                {
+                    public Object value()
+                    {
+                        return angles.pitch;
                     }
                 }));
 

@@ -17,18 +17,15 @@ public class EncoderTest extends SynchronousOpMode
     DcMotor motorFrontLeft;
     DcMotor motorBackLeft;
 
-    double heading;
-    double targetHeading;
-    double newPower;
+    double heading = 0;
+    double targetHeading = 0;
+    double newPower = 0;
 
     IBNO055IMU imu;
     IBNO055IMU.Parameters parameters = new IBNO055IMU.Parameters();
 
     @Override protected void main() throws InterruptedException
     {
-        this.composeDashboard();
-        telemetry.update();
-
         parameters.angleunit = IBNO055IMU.ANGLEUNIT.DEGREES;
         parameters.accelunit = IBNO055IMU.ACCELUNIT.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled = true;
@@ -45,21 +42,17 @@ public class EncoderTest extends SynchronousOpMode
         this.motorBackRight = this.hardwareMap.dcMotor.get("motorBackRight");
         this.motorFrontLeft = this.hardwareMap.dcMotor.get("motorFrontLeft");
         this.motorBackLeft = this.hardwareMap.dcMotor.get("motorBackLeft");
-        // telemetry.update();
 
         // One of the two motors (here, the left) should be set to reversed direction
         // so that it can take the same power level values as the other motor.
         this.motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
         this.motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        try
-        {
-            turn(90,.5);
-        }
-        catch (Exception e)
-        {
-            throw new EmptyStackException();
-        }
+        this.composeDashboard();
+        telemetry.update();
+
+        turn(90, .5);
+
     }
 
     // to turn right, degrees and power should both be positive
@@ -69,11 +62,11 @@ public class EncoderTest extends SynchronousOpMode
         heading = imu.getAngularOrientation().heading;
         targetHeading = heading + degrees;
 
-        if (targetHeading > 180)
+        if (targetHeading > 360)
         {
             targetHeading -= 360;
         }
-        else if (targetHeading < -180)
+        else if (targetHeading < 0)
         {
             targetHeading += 360;
         }
@@ -83,14 +76,27 @@ public class EncoderTest extends SynchronousOpMode
         motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         motorFrontRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
 
-        while (Math.abs(targetHeading - heading) > .5) {
+        while (Math.abs(computeDegrees(targetHeading, heading)) > 1)
+        {
             telemetry.update();
-            newPower = getPower(power, targetHeading, heading);
-            this.motorFrontRight.setPower(-newPower);
-            this.motorBackRight.setPower(-newPower);
-            this.motorFrontLeft.setPower(newPower);
-            this.motorBackLeft.setPower(newPower);
-            //TODO: add a wait
+            newPower = getPower(power, computeDegrees(targetHeading, heading));
+            telemetry.log.add("heading: " + heading);
+            telemetry.log.add("target heading: " + targetHeading);
+            telemetry.log.add("power: " + newPower);
+
+            this.motorFrontRight.setPower(newPower);
+            this.motorBackRight.setPower(newPower);
+            this.motorFrontLeft.setPower(-newPower);
+            this.motorBackLeft.setPower(-newPower);
+
+            try
+            {
+                wait(50);
+            }
+            catch (Exception e)
+            {
+            }
+
             heading = imu.getAngularOrientation().heading;
         }
 
@@ -100,14 +106,20 @@ public class EncoderTest extends SynchronousOpMode
         motorBackLeft.setPower(0);
     }
 
-    double getPower(double power, double targetHeading, double heading) {
+    double computeDegrees(double targetHeading, double heading)
+    {
         double diff = targetHeading - heading;
         if (Math.abs(diff) > 180)
         {
             diff += (-360 * (diff / Math.abs(diff)));
         }
 
-        return ((diff / Math.abs(diff)) * (Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(diff) / 15.0) + 1.0)) * power));
+        return diff;
+    }
+
+    double getPower(double power, double diff)
+    {
+        return ((diff / Math.abs(diff)) * (Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(diff) / 130.0) + 1)) * power));
     }
 
     void composeDashboard()
