@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -59,6 +60,8 @@ public class  TeleOpMecanum extends OpMode {
 	Servo servoLeftWing;
 	Servo servoClimberRelease;
 
+	AnalogInput armPotentiometer;
+
 	boolean wasRightBumper = false;
 	boolean wasLeftBumper = false;
 	boolean wasB = false;
@@ -66,6 +69,15 @@ public class  TeleOpMecanum extends OpMode {
 	boolean rightWingDown = false;
 	boolean leftWingDown = false;
 	boolean climberRelease = false;
+
+	boolean joyTwoAWasPressed;
+	boolean joyTwoXWasPressed;
+	boolean joyTwoYWasPressed;
+
+	int targetPos;
+	int climbPos = 0;
+	int extendPos = 1;
+	int storePos = 2;
 
 	public TeleOpMecanum() {
 
@@ -85,12 +97,18 @@ public class  TeleOpMecanum extends OpMode {
 		churroMotor = hardwareMap.dcMotor.get(("churroMotor"));
 		armMotor = hardwareMap.dcMotor.get(("armMotor"));
 
+
 		servoLeftWing = hardwareMap.servo.get("servoLeftWing");
 		servoRightWing = hardwareMap.servo.get("servoRightWing");
 		servoClimberRelease = hardwareMap.servo.get("servoClimberRelease");
 
+		armPotentiometer = hardwareMap.analogInput.get("pot");
+		targetPos = storePos;
+
 		motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
 		motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
+
+
 	}
 
 	/*
@@ -214,6 +232,38 @@ public class  TeleOpMecanum extends OpMode {
 		telemetry.addData("leftWingPos",servoLeftWing.getPosition());
 	}
 
+	void arm()
+	{
+		boolean joyTwoAIsPressed = gamepad2.a;
+		boolean joyTwoXIsPressed = gamepad2.x;
+		boolean joyTwoYIsPressed = gamepad2.y;
+		int currentPos = armPotentiometer.getValue();
+
+		if(joyTwoAIsPressed && !joyTwoAWasPressed)
+		{
+			targetPos = extendPos;
+		}
+		if(joyTwoXIsPressed && !joyTwoXWasPressed)
+		{
+			targetPos = climbPos;
+		}
+
+		if(joyTwoYIsPressed && !joyTwoYWasPressed)
+		{
+			targetPos = storePos;
+		}
+
+
+		armMotor.setPower(calculateArmPower(currentPos,targetPos));
+
+
+
+		joyTwoAWasPressed = joyTwoAIsPressed;
+		joyTwoXWasPressed = joyTwoXIsPressed;
+		joyTwoYWasPressed = joyTwoYIsPressed;
+
+	}
+
 	/*
 	 * Code to run when the op mode is first disabled goes here
 	 * 
@@ -234,6 +284,13 @@ public class  TeleOpMecanum extends OpMode {
 		{
 			return (float)(-(joystickValue*joystickValue)*.62);
 		}
+	}
+
+	double calculateArmPower(int currentPos, int targetPos, double maxPower)
+	{
+		double delta = targetPos-currentPos;
+
+		return (delta/Math.abs(delta)*(Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(delta) / 130.0) + 1)) * maxPower)))
 	}
 
 }
