@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannelController;
 
 import org.overlake.ftc.team_7330.Testing.HueData;
 import org.overlake.ftc.team_7330.Testing.ColorSensorData;
+import org.overlake.ftc.team_7330.Autonomous.AutonomousOpMode;
 import org.swerverobotics.library.*;
 import org.swerverobotics.library.interfaces.*;
 
@@ -47,7 +48,7 @@ public class ColorCalibration extends SynchronousOpMode
             getData(data[i].blueBeacon, "Blue beacon calibrated (sending to file)");
         }
 
-        ColorSensorData.toFile("/sdcard/FIRST/colorSensorData.txt", data);
+        ColorSensorData.toFile(AutonomousOpMode.FILE_NAME, data);
         message = "Sent to file!";
         telemetry.update();
     }

@@ -36,6 +36,8 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
     public enum Color { Red, Blue, White }
     public enum Side { Left, Right }
 
+    public static final String FILE_NAME = "/sdcard/FIRST/colorSensorData.txt";
+
     //colorSide tells if the color of the line we are following is on the left or right of the sensor
     public void followColor(HueData hue, Side colorSide)
     {
