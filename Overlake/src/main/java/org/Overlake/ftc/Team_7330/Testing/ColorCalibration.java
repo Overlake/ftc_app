@@ -21,7 +21,7 @@ public class ColorCalibration extends SynchronousOpMode
     static final int LED_CHANNEL = 5;
 
     // TODO: Implement this program for multiple sensors with an array of sensors
-    ColorSensorData[] data = new ColorSensorData[1];
+    ColorSensorData[] data;
     String message = "Program starting (next: grayTile)";
 
     @Override
@@ -35,6 +35,7 @@ public class ColorCalibration extends SynchronousOpMode
 
         composeDashboard();
         telemetry.update();
+        data = new ColorSensorData[1];
 
         for (int i = 0; i < data.length; i++)
         {
@@ -72,6 +73,10 @@ public class ColorCalibration extends SynchronousOpMode
             hue.addSample(hueFromRGB(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue()));
             waitMs(200);
         }
+
+        hue.red = sensorRGB.red();
+        hue.blue = sensorRGB.blue();
+        hue.green = sensorRGB.green();
 
         this.message = message;
         telemetry.update();
