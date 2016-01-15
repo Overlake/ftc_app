@@ -55,7 +55,6 @@ public class  TeleOpMecanum extends OpMode {
 	DcMotor motorBackRight;
 	DcMotor motorFrontLeft;
 	DcMotor motorBackLeft;
-	DcMotor churroMotor;
 	DcMotor armMotor;
 	DcMotor winchMotor;
 	//endregion
@@ -101,22 +100,18 @@ public class  TeleOpMecanum extends OpMode {
 		motorBackRight = hardwareMap.dcMotor.get("motorBackRight");
 		motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
 		motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
-		churroMotor = hardwareMap.dcMotor.get("churroMotor");
 		armMotor = hardwareMap.dcMotor.get("armMotor");
 		winchMotor = hardwareMap.dcMotor.get("winchMotor");
-
 
 		servoLeftWing = hardwareMap.servo.get("servoLeftWing");
 		servoRightWing = hardwareMap.servo.get("servoRightWing");
 		servoClimberRelease = hardwareMap.servo.get("servoClimberRelease");
 
 		armPotentiometer = hardwareMap.analogInput.get("pot");
-		targetPos = storePos;
+		targetPos = armPotentiometer.getValue();
 
 		motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
 		motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
-
-
 	}
 
 	/*
@@ -127,8 +122,6 @@ public class  TeleOpMecanum extends OpMode {
 	@Override
 	public void loop()
 	{
-
-
 		boolean rightBumper = gamepad2.right_bumper;
 		boolean leftBumper = gamepad2.left_bumper;
 		boolean b = gamepad2.b;
@@ -143,28 +136,11 @@ public class  TeleOpMecanum extends OpMode {
 		boolean joyTwoXIsPressed = gamepad2.x;
 		boolean joyTwoYIsPressed = gamepad2.y;
 
-
-
 		int currentPos = armPotentiometer.getValue();
 
 		// scale the joystick value to make it easier to control
 		// the robot more precisely at slower speeds.
 		mecanumDrive();
-
-		if(joyTwoAIsPressed && !joyTwoAWasPressed)
-		{
-			targetPos = extendPos;
-		}
-		if(joyTwoXIsPressed && !joyTwoXWasPressed)
-		{
-			targetPos = climbPos;
-		}
-
-		if(joyTwoYIsPressed && !joyTwoYWasPressed)
-		{
-			targetPos = storePos;
-		}
-
 
 		if (b && !wasB)
 		{
@@ -207,28 +183,13 @@ public class  TeleOpMecanum extends OpMode {
 		{
 			servoLeftWing.setPosition(0.93);
 		}
-		
-
-		if (upDpad2)
-		{
-			armMotor.setPower(0.6);
-		}
-		else if (downDpad2)
-		{
-			armMotor.setPower(-0.6);
-		}
-		else
-		{
-			armMotor.setPower(0);
-		}
-
 
 		//region Winch
-		if(gamepad1.right_trigger>0&&gamepad2.right_trigger>0)
+		if(gamepad1.right_trigger > 0 && gamepad2.right_trigger > 0)
 		{
 			winchMotor.setPower(1.0);
 		}
-		else if(gamepad1.left_trigger>0&&gamepad2.left_trigger>0)
+		else if(gamepad1.left_trigger > 0 && gamepad2.left_trigger > 0)
 		{
 			winchMotor.setPower(-1.0);
 		}
@@ -238,9 +199,32 @@ public class  TeleOpMecanum extends OpMode {
 		}
 		//endregion
 
+		if (upDpad2)
+		{
+			targetPos = 1024;
+		}
+		else if (downDpad2)
+		{
+			targetPos = 0;
+		}
+		else if (joyTwoAIsPressed && !joyTwoAWasPressed)
+		{
+			targetPos = extendPos;
+		}
+		else if (joyTwoXIsPressed && !joyTwoXWasPressed)
+		{
+			targetPos = climbPos;
+		}
+		else if (joyTwoYIsPressed && !joyTwoYWasPressed)
+		{
+			targetPos = storePos;
+		}
+		else
+		{
+			targetPos = currentPos;
+		}
 
-		armMotor.setPower(calculateArmPower(currentPos,targetPos,.60));
-
+		armMotor.setPower(calculateArmPower(currentPos, targetPos, .60));
 
 		wasB = b;
 		wasLeftBumper = leftBumper;
@@ -249,8 +233,8 @@ public class  TeleOpMecanum extends OpMode {
 		joyTwoXWasPressed = joyTwoXIsPressed;
 		joyTwoYWasPressed = joyTwoYIsPressed;
 
-
 		//telemetry.addData("Text", rightX + ", " + rightY + ", " + leftX + ", " + leftY);
+		telemetry.addData("pot", armPotentiometer.getValue());
 		telemetry.addData("rightWingPos",servoRightWing.getPosition());
 		telemetry.addData("leftWingPos",servoLeftWing.getPosition());
 	}
@@ -301,9 +285,8 @@ public class  TeleOpMecanum extends OpMode {
 
 	double calculateArmPower(int currentPos, int targetPos, double maxPower)
 	{
-		double delta = targetPos-currentPos;
+		double delta = targetPos - currentPos;
 
-		return (delta/Math.abs(delta)*(Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(delta) / 130.0) + 1)) * maxPower));
+		return (delta / Math.abs(delta) * (Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(delta) / 130.0) + 1)) * maxPower));
 	}
-
 }
