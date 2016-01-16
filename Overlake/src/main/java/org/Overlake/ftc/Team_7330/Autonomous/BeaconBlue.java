@@ -23,7 +23,7 @@ public class BeaconBlue extends AutonomousOpMode {
 
         driveWithEncoders(-3.7, -.7); // not sure how far, travel most of the way across the field
 
-        //drive until the right color sensor sees blue
+        // drive until the color sensor sees blue
         motorBackLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         motorBackRight.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         motorFrontLeft.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -34,21 +34,14 @@ public class BeaconBlue extends AutonomousOpMode {
         motorFrontLeft.setPower(-.15);
         motorBackLeft.setPower(-.15);
 
-        while(data[0].blueTape.isHue(convertColor(sensorRGB.red(),sensorRGB.green(),sensorRGB.blue())));
+        while(!data[0].blueTape.isHue(convertColor(sensorRGB.red(),sensorRGB.green(),sensorRGB.blue())));
         {
         }
 
-        motorFrontRight.setPower(0);
-        motorBackRight.setPower(0);
-        motorFrontLeft.setPower(0);
-        motorBackLeft.setPower(0);
-
-        driveWithEncoders(-.25, -.3);
+        driveWithEncoders(-.15, -.05);
 
         //this won't work going around the circle
         turnToTargetHeading(initialHeading - 45.0, .8);
-
-        driveWithEncoders(.5, .5);
 
         //drive until the white line
         motorFrontRight.setPower(.15);
@@ -65,7 +58,7 @@ public class BeaconBlue extends AutonomousOpMode {
         motorFrontLeft.setPower(0);
         motorBackLeft.setPower(0);
 
-        turnToTargetHeading(initialHeading + 135.0, .6);
+        turnToTargetHeading(initialHeading + 135.0, .8);
     }
 
 }
