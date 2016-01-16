@@ -3,6 +3,8 @@ package org.overlake.ftc.team_7330.Autonomous;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
+import com.qualcomm.robotcore.hardware.DigitalChannelController;
 
 import org.overlake.ftc.team_7330.Testing.HueData;
 import org.overlake.ftc.team_7330.Testing.ColorSensorData;
@@ -25,6 +27,10 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
 
     IBNO055IMU imu;
     IBNO055IMU.Parameters parameters = new IBNO055IMU.Parameters();
+
+    DeviceInterfaceModule cdim;
+
+    static final int LED_CHANNEL = 5;
 
     DcMotor motorFrontRight;
     DcMotor motorBackRight;
@@ -142,6 +148,11 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
         heading = imu.getAngularOrientation().heading;
         targetHeading = heading + degrees;
 
+        turnToTargetHeading(targetHeading, power);
+    }
+
+    void turnToTargetHeading(double targetHeading, double power)
+    {
         if (targetHeading > 360)
         {
             targetHeading -= 360;
@@ -221,6 +232,21 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
 
         // Enable reporting of position using the naive integrator
         imu.startAccelerationIntegration(new Position(), new Velocity());
+
+        hardwareMap.logDevices();
+
+        // get a reference to our DeviceInterfaceModule object.
+        cdim = hardwareMap.deviceInterfaceModule.get("dim");
+
+        // set the digital channel to output mode.
+        // remember, the Adafruit sensor is actually two devices.
+        // It's an I2C sensor and it's also an LED that can be turned on or off.
+        cdim.setDigitalChannelMode(LED_CHANNEL, DigitalChannelController.Mode.OUTPUT);
+
+        sensorRGB = hardwareMap.colorSensor.get("color");
+
+        // turn the LED on in the beginning, just so user will know that the sensor is active.
+        cdim.setDigitalChannelState(LED_CHANNEL, true);
     }
 
     public static double convertColor(int r, int g, int b)
