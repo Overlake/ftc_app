@@ -143,6 +143,10 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
         return power * (((Math.min((double)distance, (double)encRotation) / (double)encRotation) * 0.9) + 0.1);
     }
 
+    // TODO: Make the turn methods 'safer' at lower powers
+    // turn takes in a relative nuumber of degrees
+    // positive is right
+    // negative is left
     void turn(double degrees, double power)
     {
         heading = imu.getAngularOrientation().heading;
@@ -151,6 +155,9 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
         turnToTargetHeading(targetHeading, power);
     }
 
+    // turnToTargetHeading takes in an absolute number of degrees
+    // positive is right
+    // negative is left
     void turnToTargetHeading(double targetHeading, double power)
     {
         if (targetHeading > 360)
