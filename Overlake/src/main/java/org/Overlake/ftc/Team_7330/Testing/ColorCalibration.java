@@ -71,11 +71,22 @@ public class ColorCalibration extends SynchronousOpMode
 
         for(int i = 0; i < 10; i++) {
             hue.addSample(AutonomousOpMode.convertColorToHue(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue()));
-            AutonomousOpMode.waitMs(200);
+            waitMs(200);
         }
 
         this.message = message;
         telemetry.update();
+    }
+
+    public void waitMs(int ms)
+    {
+        try
+        {
+            wait(ms);
+        }
+        catch (Exception e)
+        {
+        }
     }
 
     void composeDashboard()

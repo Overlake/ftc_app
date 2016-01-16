@@ -220,7 +220,7 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
         return Math.atan2(y, x) * (360.0 / (2 * Math.PI));
     }
 
-    public static void waitMs(int ms)
+    public void waitMs(int ms)
     {
         try
         {

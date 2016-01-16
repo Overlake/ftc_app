@@ -46,6 +46,7 @@ public class BeaconBlue extends AutonomousOpMode
         while (!data[0].blueTape.isHue(hue))
         {
             hue = convertColorToHue(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue());
+            waitMs(10);
         }
 
         message = "Found blue tape; driving a little bit more";
@@ -66,6 +67,7 @@ public class BeaconBlue extends AutonomousOpMode
         while(!data[0].whiteTape.isHue(hue))
         {
             hue = convertColorToHue(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue());
+            waitMs(10);
         }
 
         message = "Found white tape; driving a little bit more";
@@ -106,7 +108,7 @@ public class BeaconBlue extends AutonomousOpMode
                         return hue;
                     }
                 })
-        )
+        );
 
         telemetry.addLine(
                 telemetry.item("Message: ", new IFunc<Object>()
