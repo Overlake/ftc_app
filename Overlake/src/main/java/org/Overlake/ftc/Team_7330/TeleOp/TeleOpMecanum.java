@@ -81,9 +81,11 @@ public class  TeleOpMecanum extends OpMode {
 
 	int targetPos;
 	int climbPos = 500;
-	int extendPos = 500;
-	int storePos = 500;
-	int lastPos = storePos;
+	int extendPos = 250;
+	int storePos = 700;
+	int maxPos = 850;
+	int minPos = 120;
+	int lastPos = maxPos;
 
 	public TeleOpMecanum() {
 
@@ -202,12 +204,12 @@ public class  TeleOpMecanum extends OpMode {
 
 		if (gamepad2.dpad_up)
 		{
-			targetPos = 700; // 908
+			targetPos = maxPos; // 908
 			lastPos = currentPos;
 		}
 		else if (gamepad2.dpad_down)
 		{
-			targetPos = 90; // 39
+			targetPos = minPos; // 39
 			lastPos = currentPos;
 		}
 		else if (gamepad2.a)
@@ -230,7 +232,14 @@ public class  TeleOpMecanum extends OpMode {
 			targetPos = lastPos;
 		}
 
-		armMotor.setPower(calculateArmPower(currentPos, targetPos, .1));
+		if (targetPos > currentPos)
+		{
+			armMotor.setPower(calculateArmPower(currentPos, targetPos, .5));
+		}
+		else
+		{
+			armMotor.setPower(calculateArmPower(currentPos, targetPos, 0.05));
+		}
 
 		wasB = b;
 		wasLeftBumper = leftBumper;
