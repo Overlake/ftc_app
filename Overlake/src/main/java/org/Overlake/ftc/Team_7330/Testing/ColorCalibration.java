@@ -70,30 +70,12 @@ public class ColorCalibration extends SynchronousOpMode
         }
 
         for(int i = 0; i < 10; i++) {
-            hue.addSample(hueFromRGB(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue()));
-            waitMs(200);
+            hue.addSample(AutonomousOpMode.convertColorToHue(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue()));
+            AutonomousOpMode.waitMs(200);
         }
 
         this.message = message;
         telemetry.update();
-    }
-
-    public static double hueFromRGB(int r, int g, int b)
-    {
-        double y = Math.sqrt(3) * (g - b);
-        double x = 2 * r - g - b;
-        return Math.atan2(y, x) * (360.0 / (2 * Math.PI));
-    }
-
-    public void waitMs(int ms)
-    {
-        try
-        {
-            wait(ms);
-        }
-        catch (Exception e)
-        {
-        }
     }
 
     void composeDashboard()
