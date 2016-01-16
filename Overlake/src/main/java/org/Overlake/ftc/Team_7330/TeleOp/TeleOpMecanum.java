@@ -80,9 +80,10 @@ public class  TeleOpMecanum extends OpMode {
 	boolean joyTwoYWasPressed;
 
 	int targetPos;
-	int climbPos = 0;
-	int extendPos = 1;
-	int storePos = 2;
+	int climbPos = 500;
+	int extendPos = 500;
+	int storePos = 500;
+	int lastPos = storePos;
 
 	public TeleOpMecanum() {
 
@@ -199,32 +200,37 @@ public class  TeleOpMecanum extends OpMode {
 		}
 		//endregion
 
-		if (upDpad2)
+		if (gamepad2.dpad_up)
 		{
-			targetPos = 1024;
+			targetPos = 700; // 908
+			lastPos = currentPos;
 		}
-		else if (downDpad2)
+		else if (gamepad2.dpad_down)
 		{
-			targetPos = 0;
+			targetPos = 90; // 39
+			lastPos = currentPos;
 		}
-		else if (joyTwoAIsPressed && !joyTwoAWasPressed)
+		else if (gamepad2.a)
 		{
 			targetPos = extendPos;
+			lastPos = currentPos;
 		}
-		else if (joyTwoXIsPressed && !joyTwoXWasPressed)
+		else if (gamepad2.x)
 		{
 			targetPos = climbPos;
+			lastPos = currentPos;
 		}
-		else if (joyTwoYIsPressed && !joyTwoYWasPressed)
+		else if (gamepad2.y)
 		{
 			targetPos = storePos;
+			lastPos = currentPos;
 		}
 		else
 		{
-			targetPos = currentPos;
+			targetPos = lastPos;
 		}
 
-		armMotor.setPower(calculateArmPower(currentPos, targetPos, .60));
+		armMotor.setPower(calculateArmPower(currentPos, targetPos, .1));
 
 		wasB = b;
 		wasLeftBumper = leftBumper;
@@ -235,6 +241,7 @@ public class  TeleOpMecanum extends OpMode {
 
 		//telemetry.addData("Text", rightX + ", " + rightY + ", " + leftX + ", " + leftY);
 		telemetry.addData("pot", armPotentiometer.getValue());
+		telemetry.addData("targetPosition",targetPos);
 		telemetry.addData("rightWingPos",servoRightWing.getPosition());
 		telemetry.addData("leftWingPos",servoLeftWing.getPosition());
 	}
