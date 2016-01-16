@@ -44,49 +44,6 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
 
     public static final String FILE_NAME = "/sdcard/FIRST/colorSensorData.txt";
 
-    //colorSide tells if the color of the line we are following is on the left or right of the sensor
-    public void followColor(HueData hue, Side colorSide)
-    {
-        double leftMotorPower = motorBackLeft.getPower();
-        double rightMotorPower = motorBackRight.getPower();
-        double increment = .05;
-
-        // TODO: Some if/else refactoring can be done here
-        if (hue.isHue(convertColor(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue())))
-        {
-            if (colorSide == Side.Left) //if color side is left, veer right
-            {
-                leftMotorPower += increment;
-                rightMotorPower -= increment;
-            }
-            else //if color side is right, veer left
-            {
-                leftMotorPower -= increment;
-                rightMotorPower += increment;
-            }
-        }
-        else
-        {
-            //the opposite of above, so the robot turns towards the colored line
-            if (colorSide == Side.Left) //if color side is left, veer left to find line
-            {
-                leftMotorPower -= increment;
-                rightMotorPower += increment;
-            }
-            else //if color side is right, veer right to find line
-            {
-                leftMotorPower += increment;
-                rightMotorPower -= increment;
-            }
-        }
-
-        //drive forward a bit
-        motorFrontRight.setPower(rightMotorPower);
-        motorBackRight.setPower(rightMotorPower);
-        motorFrontLeft.setPower(leftMotorPower);
-        motorBackLeft.setPower(leftMotorPower);
-    }
-
     void driveWithEncoders(double revolutions, double power) throws InterruptedException
     {
         // How far are we to move, in ticks instead of revolutions?
@@ -256,10 +213,21 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
         cdim.setDigitalChannelState(LED_CHANNEL, true);
     }
 
-    public static double convertColor(int r, int g, int b)
+    public static double convertColorToHue(int r, int g, int b)
     {
         double y = Math.sqrt(3) * (g - b);
         double x = 2 * r - g - b;
         return Math.atan2(y, x) * (360.0 / (2 * Math.PI));
+    }
+
+    public static void waitMs(int ms)
+    {
+        try
+        {
+            wait(ms);
+        }
+        catch (Exception e)
+        {
+        }
     }
 }
