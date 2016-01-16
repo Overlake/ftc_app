@@ -83,7 +83,7 @@ public class  TeleOpMecanum extends OpMode {
 	int climbPos = 500;
 	int extendPos = 250;
 	int storePos = 700;
-	int maxPos = 850;
+	int maxPos = 800;
 	int minPos = 120;
 	int lastPos = maxPos;
 
