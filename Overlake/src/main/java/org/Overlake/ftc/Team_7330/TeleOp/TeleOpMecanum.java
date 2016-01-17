@@ -80,11 +80,10 @@ public class  TeleOpMecanum extends OpMode {
 	boolean joyTwoYWasPressed;
 
 	int targetPos;
-	int climbPos = 500;
-	int extendPos = 250;
-	int storePos = 700;
-	int maxPos = 800;
-	int minPos = 120;
+	int climbPos = 330;
+	int extendPos = 115;
+	int maxPos = 850;
+	int minPos = 100;
 	int lastPos = maxPos;
 
 	public TeleOpMecanum() {
@@ -162,7 +161,7 @@ public class  TeleOpMecanum extends OpMode {
 
 		if (climberRelease)
 		{
-			servoClimberRelease.setPosition(0.90);
+			servoClimberRelease.setPosition(0.95);
 		}
 		else
 		{
@@ -222,11 +221,6 @@ public class  TeleOpMecanum extends OpMode {
 			targetPos = climbPos;
 			lastPos = currentPos;
 		}
-		else if (gamepad2.y)
-		{
-			targetPos = storePos;
-			lastPos = currentPos;
-		}
 		else
 		{
 			targetPos = lastPos;
@@ -238,7 +232,7 @@ public class  TeleOpMecanum extends OpMode {
 		}
 		else
 		{
-			armMotor.setPower(calculateArmPower(currentPos, targetPos, 0.05));
+			armMotor.setPower(calculateArmPower(currentPos, targetPos, 0.1));
 		}
 
 		wasB = b;
