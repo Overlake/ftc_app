@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 
+import org.overlake.ftc.team_7330.Testing.HueData;
+import org.overlake.ftc.team_7330.Testing.ColorSensorData;
 import org.swerverobotics.library.ClassFactory;
 import org.swerverobotics.library.SynchronousOpMode;
 import org.swerverobotics.library.interfaces.IBNO055IMU;
@@ -14,8 +16,8 @@ import org.swerverobotics.library.interfaces.Velocity;
  * Created by jacks on 11/13/2015.
  */
 public abstract class AutonomousOpMode extends SynchronousOpMode {
-
     final int encRotation = 1120;
+    ColorSensorData data;
 
     double heading = 0;
     double targetHeading = 0;
@@ -35,30 +37,21 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
     public enum Side { Left, Right }
 
     //colorSide tells if the color of the line we are following is on the left or right of the sensor
-
-    public boolean isColor(Color c)
-    {
-        //if the sensor sees the parameter color,
-        return true;
-
-        //else if this sensor doesn't see the color
-        // return false;
-    }
-
-    public void followColor(Color c, Side colorSide)
+    public void followColor(HueData hue, Side colorSide)
     {
         double leftMotorPower = motorBackLeft.getPower();
         double rightMotorPower = motorBackRight.getPower();
-        double increment = .005;
+        double increment = .05;
 
-        if (isColor(c))
+        // TODO: Some if/else refactoring can be done here
+        if (hue.isHue(convertColor(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue())))
         {
-            if (colorSide == Side.Left)      //if color side is left, veer right
+            if (colorSide == Side.Left) //if color side is left, veer right
             {
                 leftMotorPower += increment;
                 rightMotorPower -= increment;
             }
-            else                        //if color side is right, veer left
+            else //if color side is right, veer left
             {
                 leftMotorPower -= increment;
                 rightMotorPower += increment;
@@ -67,24 +60,23 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
         else
         {
             //the opposite of above, so the robot turns towards the colored line
-            if (colorSide == Side.Left)      //if color side is left, veer left to find line
+            if (colorSide == Side.Left) //if color side is left, veer left to find line
             {
                 leftMotorPower -= increment;
                 rightMotorPower += increment;
             }
-            else                        //if color side is right, veer right to find line
+            else //if color side is right, veer right to find line
             {
                 leftMotorPower += increment;
                 rightMotorPower -= increment;
             }
         }
 
+        //drive forward a bit
         motorFrontRight.setPower(rightMotorPower);
         motorBackRight.setPower(rightMotorPower);
         motorFrontLeft.setPower(leftMotorPower);
         motorBackLeft.setPower(leftMotorPower);
-
-        //drive forward a bit
     }
 
     void driveWithEncoders(double revolutions, double power) throws InterruptedException
@@ -227,7 +219,12 @@ public abstract class AutonomousOpMode extends SynchronousOpMode {
 
         // Enable reporting of position using the naive integrator
         imu.startAccelerationIntegration(new Position(), new Velocity());
-
     }
 
+    public static double convertColor(int r, int g, int b)
+    {
+        double y = Math.sqrt(3) * (g - b);
+        double x = 2 * r - g - b;
+        return Math.atan2(y, x) * (360.0 / (2 * Math.PI));
+    }
 }
