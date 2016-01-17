@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -48,16 +49,23 @@ import org.swerverobotics.library.interfaces.*;
 
 @TeleOp(name="TeleOpMecanum")
 public class  TeleOpMecanum extends OpMode {
+
+	//region Motors
 	DcMotor motorFrontRight;
 	DcMotor motorBackRight;
 	DcMotor motorFrontLeft;
 	DcMotor motorBackLeft;
-	DcMotor churroMotor;
 	DcMotor armMotor;
+	DcMotor winchMotor;
+	//endregion
 
+	//region Servos
 	Servo servoRightWing;
 	Servo servoLeftWing;
 	Servo servoClimberRelease;
+	//endregion
+
+	AnalogInput armPotentiometer;
 
 	boolean wasRightBumper = false;
 	boolean wasLeftBumper = false;
@@ -66,6 +74,17 @@ public class  TeleOpMecanum extends OpMode {
 	boolean rightWingDown = false;
 	boolean leftWingDown = false;
 	boolean climberRelease = false;
+
+	boolean joyTwoAWasPressed;
+	boolean joyTwoXWasPressed;
+	boolean joyTwoYWasPressed;
+
+	int targetPos;
+	int climbPos = 330;
+	int extendPos = 115;
+	int maxPos = 850;
+	int minPos = 100;
+	int lastPos = maxPos;
 
 	public TeleOpMecanum() {
 
@@ -78,16 +97,20 @@ public class  TeleOpMecanum extends OpMode {
 	 */
 	@Override
 	public void init() {
+
 		motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
 		motorBackRight = hardwareMap.dcMotor.get("motorBackRight");
 		motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
 		motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
-		churroMotor = hardwareMap.dcMotor.get(("churroMotor"));
-		armMotor = hardwareMap.dcMotor.get(("armMotor"));
+		armMotor = hardwareMap.dcMotor.get("armMotor");
+		winchMotor = hardwareMap.dcMotor.get("winchMotor");
 
 		servoLeftWing = hardwareMap.servo.get("servoLeftWing");
 		servoRightWing = hardwareMap.servo.get("servoRightWing");
 		servoClimberRelease = hardwareMap.servo.get("servoClimberRelease");
+
+		armPotentiometer = hardwareMap.analogInput.get("pot");
+		targetPos = armPotentiometer.getValue();
 
 		motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
 		motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -101,11 +124,6 @@ public class  TeleOpMecanum extends OpMode {
 	@Override
 	public void loop()
 	{
-		float rightX = Range.clip(gamepad1.right_stick_x, -1, 1);
-		float rightY = Range.clip(gamepad1.right_stick_y, -1, 1);
-		float leftX = Range.clip(gamepad1.left_stick_x, -1, 1);
-		float leftY = Range.clip(gamepad1.left_stick_y, -1, 1);
-
 		boolean rightBumper = gamepad2.right_bumper;
 		boolean leftBumper = gamepad2.left_bumper;
 		boolean b = gamepad2.b;
@@ -116,25 +134,15 @@ public class  TeleOpMecanum extends OpMode {
 		boolean upDpad2 = gamepad2.dpad_up;
 		boolean downDpad2 = gamepad2.dpad_down;
 
+		boolean joyTwoAIsPressed = gamepad2.a;
+		boolean joyTwoXIsPressed = gamepad2.x;
+		boolean joyTwoYIsPressed = gamepad2.y;
+
+		int currentPos = armPotentiometer.getValue();
+
 		// scale the joystick value to make it easier to control
 		// the robot more precisely at slower speeds.
-		rightX = scaleJoystickValue(rightX);
-		rightY = scaleJoystickValue(rightY);
-		leftX = scaleJoystickValue(leftX);
-		leftY =  scaleJoystickValue(leftY);
-		
-		// write the values to the motors
-		motorFrontRight.setPower(Range.clip(leftY + rightX + leftX, -1, 1));
-		motorBackRight.setPower(Range.clip(leftY + rightX - leftX, -1, 1));
-		motorFrontLeft.setPower(Range.clip(leftY - rightX - leftX, -1, 1));
-		motorBackLeft.setPower(Range.clip(leftY - rightX + leftX, -1, 1));
-
-		/*
-		 * Send telemetry data back to driver station. Note that if we are using
-		 * a legacy NXT-compatible motor controller, then the getPower() method
-		 * will return a null value. The legacy NXT-compatible motor controllers
-		 * are currently write only.
-		 */
+		mecanumDrive();
 
 		if (b && !wasB)
 		{
@@ -153,7 +161,7 @@ public class  TeleOpMecanum extends OpMode {
 
 		if (climberRelease)
 		{
-			servoClimberRelease.setPosition(0.90);
+			servoClimberRelease.setPosition(0.95);
 		}
 		else
 		{
@@ -178,41 +186,69 @@ public class  TeleOpMecanum extends OpMode {
 			servoLeftWing.setPosition(0.93);
 		}
 
-		if (upDpad)
+		//region Winch
+		if(gamepad1.right_trigger > 0 && gamepad2.right_trigger > 0)
 		{
-			churroMotor.setPower(0.95);
+			winchMotor.setPower(1.0);
 		}
-		else if (downDpad)
+		else if(gamepad1.left_trigger > 0 && gamepad2.left_trigger > 0)
 		{
-			churroMotor.setPower(-0.95);
-		}
-		else
-		{
-			churroMotor.setPower(0);
-		}
-
-		if (upDpad2)
-		{
-			armMotor.setPower(0.6);
-		}
-		else if (downDpad2)
-		{
-			armMotor.setPower(-0.6);
+			winchMotor.setPower(-1.0);
 		}
 		else
 		{
-			armMotor.setPower(0);
+			winchMotor.setPower(0);
+		}
+		//endregion
+
+		if (gamepad2.dpad_up)
+		{
+			targetPos = maxPos; // 908
+			lastPos = currentPos;
+		}
+		else if (gamepad2.dpad_down)
+		{
+			targetPos = minPos; // 39
+			lastPos = currentPos;
+		}
+		else if (gamepad2.a)
+		{
+			targetPos = extendPos;
+			lastPos = currentPos;
+		}
+		else if (gamepad2.x)
+		{
+			targetPos = climbPos;
+			lastPos = currentPos;
+		}
+		else
+		{
+			targetPos = lastPos;
 		}
 
+		if (targetPos > currentPos)
+		{
+			armMotor.setPower(calculateArmPower(currentPos, targetPos, .5));
+		}
+		else
+		{
+			armMotor.setPower(calculateArmPower(currentPos, targetPos, 0.1));
+		}
 
 		wasB = b;
 		wasLeftBumper = leftBumper;
 		wasRightBumper = rightBumper;
+		joyTwoAWasPressed = joyTwoAIsPressed;
+		joyTwoXWasPressed = joyTwoXIsPressed;
+		joyTwoYWasPressed = joyTwoYIsPressed;
 
-        telemetry.addData("Text", rightX + ", " + rightY + ", " + leftX + ", " + leftY);
+		//telemetry.addData("Text", rightX + ", " + rightY + ", " + leftX + ", " + leftY);
+		telemetry.addData("pot", armPotentiometer.getValue());
+		telemetry.addData("targetPosition",targetPos);
 		telemetry.addData("rightWingPos",servoRightWing.getPosition());
 		telemetry.addData("leftWingPos",servoLeftWing.getPosition());
 	}
+
 
 	/*
 	 * Code to run when the op mode is first disabled goes here
@@ -220,7 +256,28 @@ public class  TeleOpMecanum extends OpMode {
 	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#stop()
 	 */
 	@Override
-	public void stop() {
+	public void stop()
+	{
+
+	}
+
+	private void mecanumDrive()
+	{
+		float rightX = Range.clip(gamepad1.right_stick_x, -1, 1);
+		float rightY = Range.clip(gamepad1.right_stick_y, -1, 1);
+		float leftX = Range.clip(gamepad1.left_stick_x, -1, 1);
+		float leftY = Range.clip(gamepad1.left_stick_y, -1, 1);
+
+		rightX = scaleJoystickValue(rightX);
+		rightY = scaleJoystickValue(rightY);
+		leftX = scaleJoystickValue(leftX);
+		leftY =  scaleJoystickValue(leftY);
+
+		// write the values to the motors
+		motorFrontRight.setPower(Range.clip(leftY + rightX + leftX, -1, 1));
+		motorBackRight.setPower(Range.clip(leftY + rightX - leftX, -1, 1));
+		motorFrontLeft.setPower(Range.clip(leftY - rightX - leftX, -1, 1));
+		motorBackLeft.setPower(Range.clip(leftY - rightX + leftX, -1, 1));
 
 	}
 
@@ -236,4 +293,10 @@ public class  TeleOpMecanum extends OpMode {
 		}
 	}
 
+	double calculateArmPower(int currentPos, int targetPos, double maxPower)
+	{
+		double delta = targetPos - currentPos;
+
+		return (delta / Math.abs(delta) * (Math.log((Math.min(Math.E - 1, (Math.E - 1) * Math.abs(delta) / 130.0) + 1)) * maxPower));
+	}
 }

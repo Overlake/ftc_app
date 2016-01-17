@@ -138,21 +138,21 @@ public class TestIMU extends SynchronousOpMode {
                 {
                     public Object value()
                     {
-                        return formatAngle(angles.heading);
+                        return angles.heading; //formatAngle(angles.heading);
                     }
                 }),
                 telemetry.item("roll: ", new IFunc<Object>()
                 {
                     public Object value()
                     {
-                        return formatAngle(angles.roll);
+                        return angles.roll; // formatAngle(angles.roll);
                     }
                 }),
                 telemetry.item("pitch: ", new IFunc<Object>()
                 {
                     public Object value()
                     {
-                        return formatAngle(angles.pitch);
+                        return angles.pitch; // formatAngle(angles.pitch);
                     }
                 }));
 
